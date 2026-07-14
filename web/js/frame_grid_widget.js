@@ -109,11 +109,6 @@ export function setupFrameGrid(node) {
     markDirty(node);
   }
 
-  function truncate(text, max = 80) {
-    const t = String(text ?? "");
-    return t.length > max ? `${t.slice(0, max)}…` : t;
-  }
-
   function render() {
     selectedIndex = getSelectedIndex();
     if (selectedIndex >= frames.length) selectedIndex = Math.max(0, frames.length - 1);
@@ -133,7 +128,6 @@ export function setupFrameGrid(node) {
     frames.forEach((frame, index) => {
       const card = document.createElement("div");
       card.className = "storyboard-frame-card";
-      card.draggable = true;
       card.dataset.index = String(index);
 
       if (!isBatch && index === selectedIndex) {
@@ -143,13 +137,22 @@ export function setupFrameGrid(node) {
       const dragHandle = document.createElement("span");
       dragHandle.className = "storyboard-frame-drag";
       dragHandle.textContent = "⋮⋮";
+      dragHandle.draggable = true;
+      dragHandle.title = "Drag to reorder";
 
       const header = document.createElement("div");
       header.className = "storyboard-frame-header";
 
-      const nameEl = document.createElement("span");
+      const nameEl = document.createElement("input");
+      nameEl.type = "text";
       nameEl.className = "storyboard-frame-name";
-      nameEl.textContent = frame.name || frame.id;
+      nameEl.value = frame.name || frame.id;
+      nameEl.placeholder = "Frame name";
+      nameEl.addEventListener("input", () => {
+        frame.name = nameEl.value;
+        syncToWidget();
+      });
+      nameEl.addEventListener("click", (e) => e.stopPropagation());
 
       const badge = document.createElement("span");
       badge.className = "storyboard-aspect-badge";
@@ -157,14 +160,22 @@ export function setupFrameGrid(node) {
 
       header.append(nameEl, badge);
 
-      const promptEl = document.createElement("div");
+      const promptEl = document.createElement("textarea");
       promptEl.className = "storyboard-frame-prompt";
-      promptEl.textContent = truncate(frame.prompt) || "(пустой промпт)";
+      promptEl.value = frame.prompt || "";
+      promptEl.placeholder = "Prompt…";
+      promptEl.rows = 2;
+      promptEl.addEventListener("input", () => {
+        frame.prompt = promptEl.value;
+        syncToWidget();
+      });
+      promptEl.addEventListener("click", (e) => e.stopPropagation());
 
       card.append(dragHandle, header, promptEl);
 
       if (!isBatch) {
-        card.addEventListener("click", () => {
+        card.addEventListener("click", (e) => {
+          if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
           selectedIndex = index;
           setWidgetValue(node, "select", selectValueForFrame(frame, index));
           aspectSelect.value = frame.aspect || getDefaultAspect();
@@ -173,14 +184,15 @@ export function setupFrameGrid(node) {
         });
       }
 
-      card.addEventListener("dragstart", (e) => {
+      dragHandle.addEventListener("dragstart", (e) => {
         dragIndex = index;
         card.classList.add("storyboard-frame-card--dragging");
         e.dataTransfer.effectAllowed = "move";
         e.dataTransfer.setData("text/plain", String(index));
+        e.stopPropagation();
       });
 
-      card.addEventListener("dragend", () => {
+      dragHandle.addEventListener("dragend", () => {
         dragIndex = null;
         card.classList.remove("storyboard-frame-card--dragging");
         grid.querySelectorAll(".storyboard-frame-card--drag-over").forEach((el) => {

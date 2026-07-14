@@ -329,3 +329,29 @@ Live-генерации в ячейке НЕ делаем (это против C
 > «Расширь список соотношений сторон до 21:9,16:9,16:10,3:2,4:3,5:4,1:1,4:5,3:4,2:3,10:16,9:16,9:21
 > в ASPECT_RATIOS (nodes.py) и ASPECTS (frame_grid_widget.js, и cells_widget.js если есть).
 > Математику _aspect_to_size не трогай — она уже парсит любое w:h. Дефолт 16:9.»
+
+---
+
+## 🐛 P0.9 — Frame Grid: карточки нередактируемые (имя/промпт вписать негде)
+
+**Баг:** в `frame_grid_widget.js` имя кадра (`nameEl`) и промпт (`promptEl`) отрисованы как
+`<span>`/`<div>` — только текст. Добавил кадр → впечатать в него имя/промпт НЕЛЬЗЯ.
+Aspect меняется (тулбар-дропдаун), порядок таскается, выбор работает — а редактирования текста нет.
+Text Table это умеет (там `<input>`), Frame Grid — забыли.
+
+**Фикс:** имя → `<input>`, промпт → `<textarea>`, редактирование инлайн в карточке.
+По `input` → обновлять `frame.name`/`frame.prompt` + `syncToWidget()`. Клик по полю —
+`stopPropagation`, чтобы не выбирал карточку (как в `text_table_widget.js`). Стили —
+переиспользовать `.storyboard-table input/textarea` из `storyboard.css`. Drag/выбор не ломать.
+
+**Файлы:** `web/js/frame_grid_widget.js` (функция `render`, блок создания карточки).
+
+**Проверка:** добавил кадр → вписал имя и промпт прямо в карточке → значения сохранились
+в `frames_data`; Save → F5 → Load — текст на месте; drag и выбор работают.
+
+### Готовый промпт для Cursor
+> В web/js/frame_grid_widget.js сделай имя и промпт кадра редактируемыми в карточке.
+> nameEl → input, promptEl → textarea; по input обновляй frame.name/frame.prompt и зови
+> syncToWidget(); клик по полю не должен выбирать карточку (stopPropagation, как в
+> text_table_widget.js); стили из storyboard.css (.storyboard-table input/textarea);
+> drag-reorder и выбор карточки не ломай. Объясни абзацем и как проверить.
