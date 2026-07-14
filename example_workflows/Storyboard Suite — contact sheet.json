@@ -1,0 +1,84 @@
+{
+  "last_node_id": 22,
+  "last_link_id": 17,
+  "nodes": [
+    {
+      "id": 20,
+      "type": "FrameGridBatch",
+      "pos": [60, 60],
+      "size": [480, 400],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        { "name": "prompt", "type": "STRING", "links": null },
+        { "name": "name", "type": "STRING", "links": [16] },
+        { "name": "aspect_ratio", "type": "STRING", "links": null },
+        { "name": "width", "type": "INT", "links": null },
+        { "name": "height", "type": "INT", "links": null },
+        { "name": "frame_count", "type": "INT", "links": null }
+      ],
+      "properties": { "Node name for S&R": "FrameGridBatch" },
+      "widgets_values": [
+        "[\n  {\"id\": \"frame-1\", \"name\": \"opening\", \"prompt\": \"wide city skyline at dawn\", \"aspect\": \"16:9\"},\n  {\"id\": \"frame-2\", \"name\": \"hero\", \"prompt\": \"protagonist in crowd\", \"aspect\": \"16:9\"},\n  {\"id\": \"frame-3\", \"name\": \"detail\", \"prompt\": \"close-up hands with letter\", \"aspect\": \"9:16\"}\n]",
+        512,
+        "16:9"
+      ],
+      "color": "#2a2248",
+      "bgcolor": "#121218"
+    },
+    {
+      "id": 21,
+      "type": "StoryboardSheet",
+      "pos": [1200, 200],
+      "size": [340, 200],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        { "name": "images", "type": "IMAGE", "link": 15 },
+        { "name": "labels", "type": "STRING", "widget": { "name": "labels" }, "link": 16 }
+      ],
+      "outputs": [
+        { "name": "sheet", "type": "IMAGE", "links": [17] }
+      ],
+      "properties": { "Node name for S&R": "StoryboardSheet" },
+      "widgets_values": [3, 8, "#0e0e12", true, "opening\nhero\ndetail"],
+      "color": "#2a2248",
+      "bgcolor": "#121218"
+    },
+    {
+      "id": 22,
+      "type": "SaveImage",
+      "pos": [1580, 200],
+      "size": [315, 270],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        { "name": "images", "type": "IMAGE", "link": 17 }
+      ],
+      "title": "Save Storyboard Sheet",
+      "properties": { "Node name for S&R": "SaveImage" },
+      "widgets_values": ["StoryboardSheet"]
+    }
+  ],
+  "links": [
+    [17, 21, 0, 22, 0, "IMAGE"]
+  ],
+  "groups": [
+    {
+      "title": "Подключи: FrameGridBatch → sampler → VAEDecode → StoryboardSheet.images",
+      "bounding": [40, 20, 1900, 520],
+      "color": "#3f3680",
+      "font_size": 24
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": { "scale": 0.75, "offset": [0, 0] },
+    "note": "Полный граф: FrameGridBatch.prompt → CLIP/KSampler, VAEDecode.images → StoryboardSheet.images, FrameGridBatch.name → labels (или multiline вручную)"
+  },
+  "version": 0.4
+}
