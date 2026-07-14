@@ -39,6 +39,51 @@ export function hideWidget(widget) {
   };
 }
 
+/** Имя для select: name или индекс (как в Python _select_row/_select_frame). */
+export function selectOptionValue(item, index) {
+  const name = String(item?.name ?? "").trim();
+  return name || String(index);
+}
+
+export function createSelectDropdown(label = "Select") {
+  const wrap = document.createElement("div");
+  wrap.className = "storyboard-select-wrap";
+
+  const labelEl = document.createElement("span");
+  labelEl.className = "storyboard-select-label";
+  labelEl.textContent = label;
+
+  const dropdown = document.createElement("select");
+  dropdown.className = "storyboard-row-select";
+
+  wrap.append(labelEl, dropdown);
+  return { wrap, dropdown };
+}
+
+export function refreshSelectDropdown(dropdown, items, selectedIndex, getValue = selectOptionValue) {
+  dropdown.replaceChildren();
+  if (!items.length) {
+    const opt = document.createElement("option");
+    opt.value = "";
+    opt.textContent = "—";
+    dropdown.appendChild(opt);
+    dropdown.disabled = true;
+    return;
+  }
+
+  dropdown.disabled = false;
+  items.forEach((item, index) => {
+    const value = getValue(item, index);
+    const opt = document.createElement("option");
+    opt.value = value;
+    opt.textContent = String(item?.name ?? "").trim() || `#${index + 1}`;
+    dropdown.appendChild(opt);
+  });
+
+  const idx = Math.min(Math.max(0, selectedIndex), items.length - 1);
+  dropdown.value = getValue(items[idx], idx);
+}
+
 /** Резервная сериализация в node.properties — на случай если скрытый виджет не сохранится. */
 export function attachPersistHooks(node, storageKey, getData, applyData) {
   const origOnSerialize = node.onSerialize;

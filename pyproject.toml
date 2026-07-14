@@ -1,7 +1,7 @@
 [project]
 name = "comfyui-storyboard-suite"
 description = "Storyboard Suite — pre-production ноды для ComfyUI: таблица промптов и сетка кадров. Карта-ассет канала @itsmyshnikov"
-version = "0.2.3"
+version = "0.2.4"
 license = { text = "MIT License" }
 dependencies = []
 

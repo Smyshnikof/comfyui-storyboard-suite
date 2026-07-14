@@ -19,6 +19,46 @@
   padding: 8px;
   background: #1a1a20;
   border-bottom: 1px solid #2a2a32;
+  align-items: center;
+}
+
+.storyboard-select-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1 1 140px;
+  min-width: 120px;
+}
+
+.storyboard-select-label {
+  font-size: 10px;
+  color: #9090a0;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.storyboard-row-select {
+  flex: 1;
+  min-width: 0;
+  padding: 3px 6px;
+  background: #0e0e12;
+  border: 1px solid #333340;
+  border-radius: 4px;
+  color: #e8e8ec;
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.storyboard-row-select:focus {
+  outline: none;
+  border-color: #6b4fd8;
+}
+
+.storyboard-row-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .storyboard-btn {

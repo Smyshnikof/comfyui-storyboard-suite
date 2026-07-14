@@ -1,13 +1,16 @@
 import {
   ASPECTS,
   attachPersistHooks,
+  createSelectDropdown,
   findWidget,
   getWidgetValue,
   hideWidget,
   markDirty,
   nextFrameId,
   parseFramesData,
+  refreshSelectDropdown,
   resizeNode,
+  selectOptionValue,
   serializeFramesData,
   setWidgetValue,
 } from "./shared.js";
@@ -25,6 +28,7 @@ export function setupFrameGrid(node) {
   const selectWidget = isBatch ? null : findWidget(node, "select");
   const columnsWidget = isBatch ? null : findWidget(node, "columns");
   hideWidget(dataWidget);
+  if (selectWidget) hideWidget(selectWidget);
 
   resizeNode(node, 480, 420);
 
@@ -33,6 +37,26 @@ export function setupFrameGrid(node) {
 
   const toolbar = document.createElement("div");
   toolbar.className = "storyboard-toolbar";
+
+  let selectDropdown = null;
+  if (!isBatch && selectWidget) {
+    const selectControl = createSelectDropdown("Select");
+    selectDropdown = selectControl.dropdown;
+    selectDropdown.addEventListener("change", () => {
+      const val = selectDropdown.value;
+      setWidgetValue(node, "select", val);
+      const idx = frames.findIndex((frame, i) => selectValueForFrame(frame, i) === val);
+      if (idx >= 0) {
+        selectedIndex = idx;
+        if (frames[selectedIndex]) {
+          aspectSelect.value = frames[selectedIndex].aspect || getDefaultAspect();
+        }
+      }
+      render();
+      markDirty(node);
+    });
+    toolbar.appendChild(selectControl.wrap);
+  }
 
   const btnAdd = document.createElement("button");
   btnAdd.type = "button";
@@ -225,6 +249,10 @@ export function setupFrameGrid(node) {
 
       grid.appendChild(card);
     });
+
+    if (selectDropdown) {
+      refreshSelectDropdown(selectDropdown, frames, selectedIndex, selectValueForFrame);
+    }
 
     if (frames[selectedIndex]) {
       aspectSelect.value = frames[selectedIndex].aspect || getDefaultAspect();

@@ -1,11 +1,14 @@
 import {
   attachPersistHooks,
+  createSelectDropdown,
   findWidget,
   getWidgetValue,
   hideWidget,
   markDirty,
   parseTableData,
+  refreshSelectDropdown,
   resizeNode,
+  selectOptionValue,
   serializeTableData,
   setWidgetValue,
 } from "./shared.js";
@@ -24,6 +27,7 @@ export function setupTextTable(node) {
   const dataWidget = findWidget(node, "table_data");
   const selectWidget = findWidget(node, "select");
   hideWidget(dataWidget);
+  hideWidget(selectWidget);
 
   resizeNode(node, 520, 380);
 
@@ -32,6 +36,16 @@ export function setupTextTable(node) {
 
   const toolbar = document.createElement("div");
   toolbar.className = "storyboard-toolbar";
+
+  const { wrap: selectWrap, dropdown: selectDropdown } = createSelectDropdown("Select");
+  selectDropdown.addEventListener("change", () => {
+    const val = selectDropdown.value;
+    setWidgetValue(node, "select", val);
+    const idx = rows.findIndex((row, i) => selectOptionValue(row, i) === val);
+    if (idx >= 0) selectedIndex = idx;
+    render();
+    markDirty(node);
+  });
 
   const btnAdd = document.createElement("button");
   btnAdd.type = "button";
@@ -48,7 +62,7 @@ export function setupTextTable(node) {
   btnDel.className = "storyboard-btn storyboard-btn--danger";
   btnDel.textContent = "Delete";
 
-  toolbar.append(btnAdd, btnDup, btnDel);
+  toolbar.append(selectWrap, btnAdd, btnDup, btnDel);
 
   const tableWrap = document.createElement("div");
   tableWrap.className = "storyboard-table-wrap";
@@ -155,6 +169,8 @@ export function setupTextTable(node) {
       }
       tbody.appendChild(tr);
     });
+
+    refreshSelectDropdown(selectDropdown, rows, selectedIndex);
   }
 
   function loadFromWidget() {
