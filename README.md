@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="icon.png" alt="Storyboard Suite" width="180">
+</p>
+
 # Storyboard Suite — pre-production ноды для ComfyUI
 
 Пак нод для планирования генерации прямо внутри ComfyUI. Карта-ассет канала **@itsmyshnikov**.
