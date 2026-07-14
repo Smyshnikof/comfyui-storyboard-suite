@@ -2,80 +2,82 @@
   <img src="icon.png" alt="Storyboard Suite" width="180">
 </p>
 
-# Storyboard Suite — pre-production ноды для ComfyUI
+# Storyboard Suite — pre-production nodes for ComfyUI
 
-Пак нод для планирования генерации прямо внутри ComfyUI. Карта-ассет канала **@itsmyshnikov**.
+English · **[Русский](README.ru.md)**
 
-| Нода | Назначение |
-|------|------------|
-| **Text Table** | Библиотека промптов: name, prompt, negative, weight |
-| **Frame Grid** | Один кадр + `width`/`height` (INT) для EmptyLatentImage |
-| **Frame Grid (Batch)** | Все кадры списком — батч за один Queue Prompt |
-| **Sheet** | Contact-sheet: батч IMAGE или слоты `image_1..9` → лист с подписями |
-| **Cells** | Загрузка картинок прямо в ячейки → contact-sheet (без генерации) |
+A node pack for planning image generation workflows inside ComfyUI. Guild asset map by **@itsmyshnikov**.
 
-GPU не нужен — это обычный Python + JS, не генерация.
+| Node | Purpose |
+|------|---------|
+| **Text Table** | Prompt library: name, prompt, negative, weight |
+| **Frame Grid** | Single frame + `width`/`height` (INT) for EmptyLatentImage |
+| **Frame Grid (Batch)** | All frames as lists — batch in one Queue Prompt |
+| **Sheet** | Contact sheet: IMAGE batch or `image_1..9` slots → labeled grid |
+| **Cells** | Load images directly into cells → contact sheet (no generation) |
 
-## Установка
+No GPU required — plain Python + JS, not image generation.
 
-1. Скопируй папку `comfyui-storyboard-suite` в `ComfyUI/custom_nodes/`.
-2. Перезапусти ComfyUI.
-3. Правый клик → **Add Node → Storyboard**.
+## Installation
 
-Зависимостей нет (`requirements.txt` пустой).
+1. Copy the `comfyui-storyboard-suite` folder into `ComfyUI/custom_nodes/`.
+2. Restart ComfyUI.
+3. Right-click → **Add Node → Storyboard**.
 
-## Как пользоваться
+No dependencies (`requirements.txt` is empty).
+
+## Usage
 
 ### Text Table
 
-- UI-таблица: Name / Prompt / Negative / Weight.
-- Тулбар: **+ Add row**, **Duplicate**, **Delete**.
-- Выходы → `CLIP Text Encode` (prompt + negative).
+- UI table: Name / Prompt / Negative / Weight.
+- Toolbar: **+ Add row**, **Duplicate**, **Delete**.
+- Outputs → `CLIP Text Encode` (prompt + negative).
 
 ### Frame Grid
 
-- Выбор одного кадра (`select` по имени или индексу).
-- **`base_resolution`** — длинная сторона (default 1024).
-- Выходы **`width`** и **`height`** (INT, кратные 8) → `EmptyLatentImage`.
-- **`all_prompts`** — все промпты через `\n---\n` (обзор сториборда).
-- Drag-sort меняет порядок кадров; `select` сохраняет привязку по имени.
+- Pick one frame (`select` by name or index).
+- **`base_resolution`** — long edge (default 1024).
+- **`width`** and **`height`** outputs (INT, multiples of 8) → `EmptyLatentImage`.
+- **`all_prompts`** — all prompts joined with `\n---\n` (storyboard overview).
+- Drag-sort reorders frames; `select` keeps binding by name.
 
 ### Frame Grid (Batch)
 
-- Те же кадры, но выходы — **списки** (`OUTPUT_IS_LIST`).
-- Подключай к нодам, которые принимают list — один Queue прогонит все кадры.
+- Same frames, but outputs are **lists** (`OUTPUT_IS_LIST`).
+- Wire to nodes that accept lists — one Queue runs every frame.
 
 ### Storyboard Sheet
 
-- Вход **`images`** (батч) **или** отдельные слоты **`image_1` … `image_9`** — можно подключить несколько Load Image без Batch Images.
-- **`labels`** — multiline, по строке на кадр.
-- Собирает contact-sheet → `SaveImage` / `PreviewImage`.
+- Input **`images`** (batch) **or** individual slots **`image_1` … `image_9`** — connect multiple Load Image nodes without Batch Images.
+- **`labels`** — multiline, one line per frame.
+- Builds a contact sheet → `SaveImage` / `PreviewImage`.
 
 ### Storyboard Cells
 
-- Загрузи картинки **прямо в ноду** (кнопка «+» в ячейке).
-- **Выход `sheet`** → сразу в **Preview Image** или **Save Image** (Sheet между ними не нужен).
-- Queue → лист IMAGE + превью в ноде.
-- Подписи: **`label_font_size`**, **`label_bar_height`** (0 = авто), **`label_color`**, **`label_bg_color`** — кириллица через `assets/DejaVuSans.ttf`.
+- Load images **directly in the node** (“+” button in each cell).
+- **`sheet` output** → straight to **Preview Image** or **Save Image** (no Sheet in between).
+- Queue → IMAGE sheet + in-node preview.
+- Labels: **`label_font_size`**, **`label_bar_height`** (0 = auto), **`label_color`**, **`label_bg_color`** — Cyrillic via `assets/DejaVuSans.ttf`.
 
-> **Не подключай Cells → Sheet.** Cells уже отдаёт готовый лист. Sheet — для картинок из пайплайна (VAEDecode, Load Image).
+> **Do not wire Cells → Sheet.** Cells already outputs a finished sheet. Sheet is for images from the pipeline (VAEDecode, Load Image).
 
-Соотношения сторон: `21:9` … `9:21` (13 пресетов) в Frame Grid и Cells.
+Aspect ratios: `21:9` … `9:21` (13 presets) in Frame Grid and Cells.
 
-## Пример воркфлоу
+## Example workflows
 
-`example_workflows/Storyboard Suite — prompt library + frame grid.json` — одиночный кадр + SD1.5.
+`example_workflows/Storyboard Suite — prompt library + frame grid.json` — single frame + SD1.5.
 
 `example_workflows/Storyboard Suite — contact sheet.json` — `FrameGridBatch` → sampler → `StoryboardSheet` → Save.
 
 - `TextTable` → CLIP Text Encode (positive/negative)
 - `FrameGrid.width/height` → EmptyLatentImage
-- Checkpoint SD1.5 → KSampler → SaveImage
+- SD1.5 checkpoint → KSampler → SaveImage
 
-Нужен чекпойнт `v1-5-pruned-emaonly.safetensors` (стандартный SD1.5).
+Requires checkpoint `v1-5-pruned-emaonly.safetensors` (standard SD1.5).
 
-## Публикация
+## Publishing
 
-См. [PUBLISHING.md](PUBLISHING.md). Реестр: `comfyui-storyboard-suite`, Publisher `smyshnikof`.
+See [PUBLISHING.md](PUBLISHING.md). Registry: `comfyui-storyboard-suite`, Publisher `smyshnikof`.
 
-MIT. См. [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).
